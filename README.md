@@ -1,126 +1,99 @@
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
+<!-- combined_teachable_machine.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combined Teachable Machine Image Model</title>
+<!-- TensorFlow.js script tags -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
- 
-    // the link to your model provided by Teachable Machine export panel
-    const URL = "./my_model/";
- 
-    let model, webcam, labelContainer, maxPredictions;
- 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
- 
-        // load the model and metadata
-        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-        // or files from your local hard drive
-        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
- 
-        // Convenience function to setup a webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
-        await webcam.play();
-        window.requestAnimationFrame(loop);
- 
-        // append elements to the DOM
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-        labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < maxPredictions; i++) { // and class labels
-            labelContainer.appendChild(document.createElement("div"));
-        }
-    }
- 
-    async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
- 
-    // run the webcam image through the image model
-    async function predict() {
-        // predict can take in an image, video or canvas html element
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
-        }
-    }
-</script>
-<div>Teachable Machine Image Model - p5.js and ml5.js</div>
+<!-- p5.js and ml5.js script tags -->
 <script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/addons/p5.dom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ml5@latest/dist/ml5.min.js"></script>
+</head>
+<body>
+<div>Teachable Machine Image Model - TensorFlow.js</div>
+<button type="button" onclick="initTF()">Start TensorFlow.js</button>
+<div id="webcam-container-tf"></div>
+<div id="label-container-tf"></div>
+<hr>
+<div>Teachable Machine Image Model - p5.js and ml5.js</div>
+<button type="button" onclick="initML5()">Start p5.js and ml5.js</button>
+<div id="webcam-container-ml5"></div>
+<div id="label-container-ml5"></div>
 <script type="text/javascript">
-  // Classifier Variable
-  let classifier;
-  // Model URL
-  let imageModelURL = 'https://teachablemachine.withgoogle.com/models/QxGqkZk5U/';
-  // Video
-  let video;
-  let flippedVideo;
-  // To store the classification
-  let label = "";
- 
-  // Load the model first
-  function preload() {
-    classifier = ml5.imageClassifier(imageModelURL + 'model.json');
-  }
- 
-  function setup() {
-    createCanvas(320, 260);
-    // Create the video
-    video = createCapture(VIDEO);
-    video.size(320, 240);
-    video.hide();
- 
-    flippedVideo = ml5.flipImage(video);
-    // Start classifying
-    classifyVideo();
-  }
- 
-  function draw() {
-    background(0);
-    // Draw the video
-    image(flippedVideo, 0, 0);
- 
-    // Draw the label
-    fill(255);
-    textSize(16);
-    textAlign(CENTER);
-    text(label, width / 2, height - 4);
-  }
- 
-  // Get a prediction for the current video frame
-  function classifyVideo() {
-    flippedVideo = ml5.flipImage(video)
-    classifier.classify(flippedVideo, gotResult);
-    flippedVideo.remove();
- 
-  }
- 
-  // When we get a result
-  function gotResult(error, results) {
-    // If there is an error
-    if (error) {
-      console.error(error);
-      return;
-    }
-    // The results are in an array ordered by confidence.
-    // console.log(results[0]);
-    label = results[0].label;
-    // Classifiy again!
-    classifyVideo();
-  }
+   // TensorFlow.js code
+   const URL_TF = "./my_model_tf/";
+   let modelTF, webcamTF, labelContainerTF, maxPredictionsTF;
+   async function initTF() {
+     const modelURL = URL_TF + "model.json";
+     const metadataURL = URL_TF + "metadata.json";
+     modelTF = await tmImage.load(modelURL, metadataURL);
+     maxPredictionsTF = modelTF.getTotalClasses();
+     const flipTF = true;
+     webcamTF = new tmImage.Webcam(200, 200, flipTF);
+     await webcamTF.setup();
+     await webcamTF.play();
+     window.requestAnimationFrame(loopTF);
+     document.getElementById("webcam-container-tf").appendChild(webcamTF.canvas);
+     labelContainerTF = document.getElementById("label-container-tf");
+     for (let i = 0; i < maxPredictionsTF; i++) {
+       labelContainerTF.appendChild(document.createElement("div"));
+     }
+   }
+   async function loopTF() {
+     webcamTF.update();
+     await predictTF();
+     window.requestAnimationFrame(loopTF);
+   }
+   async function predictTF() {
+     const prediction = await modelTF.predict(webcamTF.canvas);
+     for (let i = 0; i < maxPredictionsTF; i++) {
+       const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+       labelContainerTF.childNodes[i].innerHTML = classPrediction;
+     }
+   }
+   // p5.js and ml5.js code
+   let classifierML5;
+   let imageModelURLML5 = 'https://teachablemachine.withgoogle.com/models/QxGqkZk5U/';
+   let videoML5;
+   let flippedVideoML5;
+   let labelML5 = "";
+   function preload() {
+     classifierML5 = ml5.imageClassifier(imageModelURLML5 + 'model.json');
+   }
+   function setup() {
+     createCanvas(320, 260);
+     videoML5 = createCapture(VIDEO);
+     videoML5.size(320, 240);
+     videoML5.hide();
+     flippedVideoML5 = ml5.flipImage(videoML5);
+     classifyVideoML5();
+   }
+   function draw() {
+     background(0);
+     image(flippedVideoML5, 0, 0);
+     fill(255);
+     textSize(16);
+     textAlign(CENTER);
+     text(labelML5, width / 2, height - 4);
+   }
+   function classifyVideoML5() {
+     flippedVideoML5 = ml5.flipImage(videoML5);
+     classifierML5.classify(flippedVideoML5, gotResultML5);
+     flippedVideoML5.remove();
+   }
+   function gotResultML5(error, results) {
+     if (error) {
+       console.error(error);
+       return;
+     }
+     labelML5 = results[0].label;
+     classifyVideoML5();
+   }
 </script>
-
+</body>
+</html>
+har genvejsmenu
